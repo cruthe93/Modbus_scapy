@@ -58,6 +58,24 @@ class Modbus(scapy_all.Packet):
         scapy_all.ByteEnumField("function_code", None, FUNCTION_CODES)
     ]
 
+class Modbus_ExceptionCode(scapy_all.Packet):
+
+    EXCEPTION_CODES = {
+        0x01 : "ILLEGAL_FUNCTION",
+        0x02 : "ILLEGAL_DATA_ADDRESS",
+        0x03 : "ILLEGAL_DATA_VALUE",
+        0x04 : "SLAVE_DEVICE_FAILURE",
+        0x05 : "ACKNOWLEDGE",
+        0x06 : "SLAVE_DEVICE_BUSY",
+        0x08 : "MEMORY_PARITY_ERROR",
+        0x0A : "GATEWAY_PATH_UNAVAILABLE",
+        0x0B : "GATEWAY_TARGET_DEVICE_FAILED_TO_RESPOND"
+    }
+
+    fields_desc = [
+        scapy_all.XByteField("exception_code", None)
+    ]
+
 # Do I need separate layers for both requests and responses?
 
 class Modbus_ReadCoilsReq(scapy_all.Packet):
