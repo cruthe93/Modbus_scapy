@@ -127,4 +127,4 @@ scapy_all.bind_layers(Modbus, Modbus_ReportSlaveIdResp, function_code=17)
 
 
 if __name__ == "__main__":
-    interact(mydict=globals(), mybanner="SCAPY MODBUS ADDON V0.01")
+    scapy_all.interact(mydict=globals(), mybanner="SCAPY MODBUS ADDON V0.01")
