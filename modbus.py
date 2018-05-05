@@ -18,7 +18,7 @@ class Modbus_TCP(scapy.all.Packet):
         return "", p
 
     def post_build(self, p, pay):
-        is self.length == None and pay:
+        if self.length == None and pay:
             l = len(pay)
             p = p[:] + struct.pack() + p[:]
         return p + pay
