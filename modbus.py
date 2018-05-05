@@ -21,7 +21,7 @@ class Modbus_TCP(scapy_all.Packet):
         # Post build is used to calculate the length of fields
         if self.length is None and pay:
             l = len(pay)
-            p = p[:4] + struct.pack("<H", l) + p[7:] # This is due to the structure of the frame
+            p = p[:4] + struct.pack(">H", l) + p[6:] # This is due to the structure of the frame
         return p + pay
 
 class Modbus(scapy_all.Packet):
