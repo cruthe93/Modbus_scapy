@@ -126,7 +126,8 @@ class Modbus_ReportSlaveIdResp(scapy_all.Packet):
 
 
 # Modbus is defined as using TCP port 502
-scapy_all.bind_layers(scapy_all.TCP, Modbus_TCP, sport=502, dport=502)
+scapy_all.bind_layers(scapy_all.TCP, Modbus_TCP, dport=502)
+scapy_all.bind_layers(scapy_all.TCP, Modbus_TCP, sport=502)
 scapy_all.bind_layers(Modbus_TCP, Modbus)
 """
 bind_layers(Modbus, Modbus_ReadDiscreteInputsReq, function_code=2)
