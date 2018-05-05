@@ -9,7 +9,7 @@ class Modbus_TCP(scapy.all.Packet):
     fields_desc = [
         scapy.all.ShortField("transaction_id", None),
         scapy.all.ShortField("protocol_id", 0),
-        scapy.all.ShortField("length", None),   # This needs to be
+        scapy.all.ShortField("length", None),   # This needs to be figured out somehow. It's vairable
         scapy.all.ByteField("unit_id", 255),
     ]
 
@@ -56,7 +56,7 @@ class Modbus_ReadCoilsReq(scapy.all.Packet):
 class Modbus_ReadCoilsResp(scapy.all.Packet):
     """Layer for Read coils response packet"""
     fields_desc = [
-        scapy.all.FieldLenField("byte_count", None, length_of="coil_status"),
+        scapy.all.FieldLenField("byte_count", 0, length_of="coil_status"),
         scapy.all.StrLenField("coil_status", "", length_from= lambda x:x.length)
     ]
 
@@ -84,15 +84,24 @@ class Modbus_ReportSlaveIdReq(scapy.all.Packet):
 
 class Modbus_ReportSlaveIdResp(scapy.all.Packet):
     """Layer for report slave ID response"""
+    fields_desc = [
+        scapy.all.FieldLenField("byte_count", 0, length_of="slave_id"),
+        scapy.all.StrLenField("slave_id", "", length_from=lambda x:x.length),
+        scapy.all.XByteField("run_status", 0x00)
+    ]
 
 
 
 
 bind_layers(scapy.all.UDP, Modbus_TCP)
 bind_layers(Modbus_TCP, Modbus)
+bind_layers(Modbus, Modbus_ReadDiscreteInputsReq, function_code=2)
+bind_layers(Modbus, Modbus_ReadDiscreteInputsResp, function_code=2)
 bind_layers(Modbus, Modbus_ReadCoilsReq, function_code=1)
 bind_layers(Modbus, Modbus_ReadCoilsResp, function_code=1)
 bind_layers(Modbus, Modbus_WriteSingleCoilReq, function_code=5)
 bind_layers(Modbus, Modbus_WriteSingleCoilResp, function_code=5)
+bind_layers(Modbus, Modbus_WriteMultipleCoilsReq, function_code=15)
+bind_layers(Modbus, Modbus_WriteMultipleCoilsResp, function_code=15)
 bind_layers(Modbus, Modbus_ReportSlaveIdReq, function_code=17)
 bind_layers(Modbus, Modbus_ReportSlaveIdResp, function_code=17)
