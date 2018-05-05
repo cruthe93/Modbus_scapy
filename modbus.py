@@ -18,9 +18,10 @@ class Modbus_TCP(scapy.all.Packet):
         return "", p
 
     def post_build(self, p, pay):
+        # Post build is used to calculate the length of fields
         if self.length is None and pay:
             l = len(pay)
-            p = p[:4] + struct.pack("<H", l) + p[7:]
+            p = p[:4] + struct.pack("<H", l) + p[7:] # This is due to the structure of the frame
         return p + pay
 
 class Modbus(scapy.all.Packet):
@@ -106,14 +107,14 @@ class Modbus_ReportSlaveIdResp(scapy.all.Packet):
 
 
 
-
-bind_layers(scapy.all.UDP, Modbus_TCP)
+# Modbus is defined as using TCP port 502
+bind_layers(scapy.all.TCP, Modbus_TCP, sport=502, dport=502)
 bind_layers(Modbus_TCP, Modbus)
 """
 bind_layers(Modbus, Modbus_ReadDiscreteInputsReq, function_code=2)
 bind_layers(Modbus, Modbus_ReadDiscreteInputsResp, function_code=2)
 """
-bind_layers(Modbus, Modbus_ReadCoilsReq, function_code=1)
+bind_layers(Modbus, Modbus_ReadCoilsReq, function_code=1) # This way scapy cannot differentiate between a request and a response!!
 bind_layers(Modbus, Modbus_ReadCoilsResp, function_code=1)
 """
 bind_layers(Modbus, Modbus_WriteSingleCoilReq, function_code=5)
