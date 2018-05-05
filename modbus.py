@@ -1,7 +1,8 @@
 import struct
 from scapy import all
 
-# Test
+# How do you know if the layer is a request or a response?
+# Where do you put exception codes in the layers?
 
 class Modbus_TCP(scapy.all.Packet):
     """Modbus TCP Packet Layer"""
@@ -9,13 +10,23 @@ class Modbus_TCP(scapy.all.Packet):
     fields_desc = [
         scapy.all.ShortField("transaction_id", None),
         scapy.all.ShortField("protocol_id", 0),
-        scapy.all.ShortField("length", None),   # This needs to be figured out somehow. It's vairable
+        scapy.all.ShortField("length", None),   # Is the length inherited from the child layers?
         scapy.all.ByteField("unit_id", 255),
     ]
+
+    def extract_padding(self, p): # Will there be any padding?
+        return "", p
+
+    def post_build(self, p, pay):
+        is self.length == None and pay:
+            l = len(pay)
+            p = p[:] + struct.pack() + p[:]
+        return p + pay
 
 class Modbus(scapy.all.Packet):
 
     FUNCTION_CODES = {
+    # Data functions
         2 : "READ_DISCRETE_INPUTS",
         1 : "READ_COILS",
         5 : "WRITE_SINGLE_COIL",
@@ -30,6 +41,7 @@ class Modbus(scapy.all.Packet):
         20 : "WRITE_FILE_RECORD",
         21 : "READ_FILE_RECORD",
 
+    # Diagnostic functions
         7 : "READ_EXCEPTION_STATUS",
         8 : "DIAGNOSTIC",            # Note: Needs sub code
         11 : "GET_COM_EVENT_COUNTER",
@@ -37,6 +49,7 @@ class Modbus(scapy.all.Packet):
         17 : "REPORT_SLAVE_ID",
         43 : "READ_DEVICE_IDENTIFICATION",
 
+    # "Other" function
         43 : "ENCAPSULATED_INTERFACE_TRANSPORT"
     }
 
