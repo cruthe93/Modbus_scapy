@@ -3,14 +3,15 @@ from scapy import all as scapy_all
 
 # How do you know if the layer is a request or a response?
 # Where do you put exception codes in the layers?
+# NOTE: for modbus the TCP layer has the PSH, ACK flags set.
 
 class Modbus_TCP(scapy_all.Packet):
     """Modbus TCP Packet Layer"""
     name = "Modbus_TCP"
     fields_desc = [
-        scapy_all.ShortField("transaction_id", None),
+        scapy_all.ShortField("transaction_id", None), # A simple implementation of this is to use the tcp sequence number, and increment by 1 for each packet
         scapy_all.ShortField("protocol_id", 0),
-        scapy_all.ShortField("length", None),   # Is the length inherited from the child layers?
+        scapy_all.ShortField("length", None),   # Is the length inherited from the child layers? If so, it'll need to be calculated
         scapy_all.ByteField("unit_id", None),
     ]
 
@@ -133,7 +134,8 @@ scapy_all.bind_layers(Modbus_TCP, Modbus)
 bind_layers(Modbus, Modbus_ReadDiscreteInputsReq, function_code=2)
 bind_layers(Modbus, Modbus_ReadDiscreteInputsResp, function_code=2)
 """
-scapy_all.bind_layers(Modbus, Modbus_ReadCoilsReq, function_code=1) # This way scapy cannot differentiate between a request and a response!!
+scapy_all.bind_layers(scapy_all.TCP, Modbus_ReadCoilsReq, dport=502)
+scapy_all.bind_layers(Modbus, Modbus_ReadCoilsReq, function_code=1)
 scapy_all.bind_layers(Modbus, Modbus_ReadCoilsResp, function_code=1)
 """
 bind_layers(Modbus, Modbus_WriteSingleCoilReq, function_code=5)
