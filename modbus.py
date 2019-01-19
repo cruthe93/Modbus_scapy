@@ -5,17 +5,17 @@ from scapy import all as scapy_all
 # Where do you put exception codes in the layers?
 # NOTE: for modbus the TCP layer has the PSH, ACK flags set.
 
-class Modbus_TCP(scapy_all.Packet):
-    """Modbus TCP base packet layer. All Modbus TCP packets have these fields"""
-    name = "Modbus_TCP"
+class Modbus_MBAP(scapy_all.Packet):
+    """Modbus TCP base packet layer. This represents the Modbus application protocol header (MBAP)"""
+    name = "Modbus_MBAP"
     fields_desc = [
         scapy_all.ShortField("transaction_id", None), # A simple implementation of this is to use the tcp sequence number, and increment by 1 for each packet
-        scapy_all.ShortField("protocol_id", 0),
+        scapy_all.ShortField("protocol_id", 0), # I believe for Modbus TCP this is always 0
         scapy_all.ShortField("length", None),   # Is the length inherited from the child layers? If so, it'll need to be calculated
         scapy_all.ByteField("unit_id", None),
     ]
 
-    def extract_padding(self, p): # Will there be any padding?
+    def extract_padding(self, p): # Will there be any padding? This is supposed to return the length
         return "", p
 
     def post_build(self, p, pay):
@@ -27,9 +27,9 @@ class Modbus_TCP(scapy_all.Packet):
 
     def answers(self, other):
         # This may need adjusting
-        return isinstance(other, Modbus_TCP)
+        return isinstance(other, Modbus_MBAP)
 
-class Modbus(scapy_all.Packet):
+class Modbus_PDU(scapy_all.Packet):
 
     FUNCTION_CODES = {
     # Data functions
@@ -49,14 +49,14 @@ class Modbus(scapy_all.Packet):
 
     # Diagnostic functions
         7 : "READ_EXCEPTION_STATUS",
-        8 : "DIAGNOSTIC",            # Note: Needs sub code
+        8 : "DIAGNOSTIC",            # Note: Needs sub code (00-18, 20)
         11 : "GET_COM_EVENT_COUNTER",
         12 : "GET_COM_EVENT_LOG",
         17 : "REPORT_SLAVE_ID",
-        43 : "READ_DEVICE_IDENTIFICATION",
+        43 : "READ_DEVICE_IDENTIFICATION", # Sub code 14
 
     # "Other" function
-        43 : "ENCAPSULATED_INTERFACE_TRANSPORT"
+        43 : "ENCAPSULATED_INTERFACE_TRANSPORT" # sub codes 13,14
     }
 
     fields_desc =[
@@ -131,24 +131,24 @@ class Modbus_ReportSlaveIdResp(scapy_all.Packet):
 
 
 # Modbus is defined as using TCP port 502
-scapy_all.bind_layers(scapy_all.TCP, Modbus_TCP, dport=502)
-scapy_all.bind_layers(scapy_all.TCP, Modbus_TCP, sport=502)
-scapy_all.bind_layers(Modbus_TCP, Modbus)
+scapy_all.bind_layers(scapy_all.TCP, Modbus_MBAP, dport=502)
+scapy_all.bind_layers(scapy_all.TCP, Modbus_MBAP, sport=502)
+scapy_all.bind_layers(Modbus_MBAP, Modbus_PDU)
 """
-bind_layers(Modbus, Modbus_ReadDiscreteInputsReq, function_code=2)
-bind_layers(Modbus, Modbus_ReadDiscreteInputsResp, function_code=2)
+bind_layers(Modbus_PDU, Modbus_ReadDiscreteInputsReq, function_code=2)
+bind_layers(Modbus_PDU, Modbus_ReadDiscreteInputsResp, function_code=2)
 """
 scapy_all.bind_layers(scapy_all.TCP, Modbus_ReadCoilsReq, dport=502)
-scapy_all.bind_layers(Modbus, Modbus_ReadCoilsReq, function_code=1)
-scapy_all.bind_layers(Modbus, Modbus_ReadCoilsResp, function_code=1)
+scapy_all.bind_layers(Modbus_PDU, Modbus_ReadCoilsReq, function_code=1)
+scapy_all.bind_layers(Modbus_PDU, Modbus_ReadCoilsResp, function_code=1)
 """
-bind_layers(Modbus, Modbus_WriteSingleCoilReq, function_code=5)
-bind_layers(Modbus, Modbus_WriteSingleCoilResp, function_code=5)
-bind_layers(Modbus, Modbus_WriteMultipleCoilsReq, function_code=15)
-bind_layers(Modbus, Modbus_WriteMultipleCoilsResp, function_code=15)
-bind_layers(Modbus, Modbus_ReportSlaveIdReq, function_code=17)
+bind_layers(Modbus_PDU, Modbus_WriteSingleCoilReq, function_code=5)
+bind_layers(Modbus_PDU, Modbus_WriteSingleCoilResp, function_code=5)
+bind_layers(Modbus_PDU, Modbus_WriteMultipleCoilsReq, function_code=15)
+bind_layers(Modbus_PDU, Modbus_WriteMultipleCoilsResp, function_code=15)
+bind_layers(Modbus_PDU, Modbus_ReportSlaveIdReq, function_code=17)
 """
-scapy_all.bind_layers(Modbus, Modbus_ReportSlaveIdResp, function_code=17)
+scapy_all.bind_layers(Modbus_PDU, Modbus_ReportSlaveIdResp, function_code=17)
 
 
 if __name__ == "__main__":
