@@ -6,7 +6,7 @@ from scapy import all as scapy_all
 # NOTE: for modbus the TCP layer has the PSH, ACK flags set.
 
 class Modbus_TCP(scapy_all.Packet):
-    """Modbus TCP Packet Layer"""
+    """Modbus TCP base packet layer. All Modbus TCP packets have these fields"""
     name = "Modbus_TCP"
     fields_desc = [
         scapy_all.ShortField("transaction_id", None), # A simple implementation of this is to use the tcp sequence number, and increment by 1 for each packet
@@ -24,6 +24,10 @@ class Modbus_TCP(scapy_all.Packet):
             l = len(pay)
             p = p[:4] + struct.pack(">H", l) + p[6:] # This is due to the structure of the frame
         return p + pay
+
+    def answers(self, other):
+        # This may need adjusting
+        return isinstance(other, Modbus_TCP)
 
 class Modbus(scapy_all.Packet):
 
