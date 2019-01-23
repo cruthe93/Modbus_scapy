@@ -6,62 +6,6 @@ from scapy import all as scapy_all
 # NOTE: for modbus the TCP layer has the PSH, ACK flags set.
 #
 
-modbus_classes_requests = {
-	# Data functions
-		2  : Modbus_ReadDiscreteInputsReq,
-		1  : Modbus_ReadCoilsReq,
-		5  : Modbus_WriteSingleCoilReq,
-		15 : Modbus_WriteMultipleCoilsReq,
-		4  : Modbus_ReadInputRegisterReq,
-		3  : Modbus_ReadHoldingRegistersReq,
-		6  : Modbus_WriteSingleRegisterReq,
-		16 : Modbus_WriteMultipleRegistersReq,
-		23 : Modbus_ReadWriteMultipleRegistersReq,
-		22 : Modbus_MaskWriteRegistersReq,
-		24 : Modbus_ReadFIFOQueueReq,
-		20 : Modbus_WriteFileRecordReq,
-		21 : Modbus_ReadFileRecordReq,
-
-	# Diagnostic functions
-		7  : Modbus_ReadExceptionStatusReq,
-		8  : Modbus_DiagnosticReq,            # Note: Needs sub code (00-18, 20)
-		11 : Modbus_GetComEventCounterReq,
-		12 : Modbus_GetComEventLogReq,
-		17 : Modbus_ReportSlaveIdReq,
-		43 : Modbus_ReadDeviceIDReq, # Sub code 14
-
-	# "Other" function
-		43 : Modbus_EncapsulatedInterfaceTransportResp # sub codes 13,14
-}
-
-modbus_classes_responses = {
-	# Data functions
-		2  : Modbus_ReadDiscreteInputsResp,
-		1  : Modbus_ReadCoilsResp,
-		5  : Modbus_WriteSingleCoilResp,
-		15 : Modbus_WriteMultipleCoilsResp,
-		4  : Modbus_ReadInputRegisterResp,
-		3  : Modbus_ReadHoldingRegistersResp,
-		6  : Modbus_WriteSingleRegisterResp,
-		16 : Modbus_WriteMultipleRegistersResp,
-		23 : Modbus_ReadWriteMultipleRegistersResp,
-		22 : Modbus_MaskWriteRegistersResp,
-		24 : Modbus_ReadFIFOQueueResp,
-		20 : Modbus_WriteFileRecordResp,
-		21 : Modbus_ReadFileRecordResp,
-
-	# Diagnostic functions
-		7  : Modbus_ReadExceptionStatusResp,
-		8  : Modbus_DiagnosticResp,            # Note: Needs sub code (00-18, 20)
-		11 : Modbus_GetComEventCounterResp,
-		12 : Modbus_GetComEventLogResp,
-		17 : Modbus_ReportSlaveIdResp,
-		43 : Modbus_ReadDeviceIDResp, # Sub code 14
-
-	# "Other" function
-		43 : Modbus_EncapsulatedInterfaceTransportResp # sub codes 13,14
-}
-
 class Modbus_MBAP(scapy_all.Packet):
 	"""Modbus TCP base packet layer. This represents the Modbus application protocol header (MBAP)"""
 	name = "Modbus_MBAP"
@@ -389,6 +333,62 @@ class Modbus_EncapsulatedInterfaceTransportReq(scapy_all.Packet):
 class Modbus_EncapsulatedInterfaceTransportResp(scapy_all.Packet):
 	pass
 
+
+modbus_classes_requests = {
+	# Data functions
+		2  : Modbus_ReadDiscreteInputsReq,
+		1  : Modbus_ReadCoilsReq,
+		5  : Modbus_WriteSingleCoilReq,
+		15 : Modbus_WriteMultipleCoilsReq,
+		4  : Modbus_ReadInputRegisterReq,
+		3  : Modbus_ReadHoldingRegistersReq,
+		6  : Modbus_WriteSingleRegisterReq,
+		16 : Modbus_WriteMultipleRegistersReq,
+		23 : Modbus_ReadWriteMultipleRegistersReq,
+		22 : Modbus_MaskWriteRegistersReq,
+		24 : Modbus_ReadFIFOQueueReq,
+		20 : Modbus_WriteFileRecordReq,
+		21 : Modbus_ReadFileRecordReq,
+
+	# Diagnostic functions
+		7  : Modbus_ReadExceptionStatusReq,
+		8  : Modbus_DiagnosticReq,            # Note: Needs sub code (00-18, 20)
+		11 : Modbus_GetComEventCounterReq,
+		12 : Modbus_GetComEventLogReq,
+		17 : Modbus_ReportSlaveIdReq,
+		43 : Modbus_ReadDeviceIDReq, # Sub code 14
+
+	# "Other" function
+		43 : Modbus_EncapsulatedInterfaceTransportResp # sub codes 13,14
+}
+
+modbus_classes_responses = {
+	# Data functions
+		2  : Modbus_ReadDiscreteInputsResp,
+		1  : Modbus_ReadCoilsResp,
+		5  : Modbus_WriteSingleCoilResp,
+		15 : Modbus_WriteMultipleCoilsResp,
+		4  : Modbus_ReadInputRegisterResp,
+		3  : Modbus_ReadHoldingRegistersResp,
+		6  : Modbus_WriteSingleRegisterResp,
+		16 : Modbus_WriteMultipleRegistersResp,
+		23 : Modbus_ReadWriteMultipleRegistersResp,
+		22 : Modbus_MaskWriteRegistersResp,
+		24 : Modbus_ReadFIFOQueueResp,
+		20 : Modbus_WriteFileRecordResp,
+		21 : Modbus_ReadFileRecordResp,
+
+	# Diagnostic functions
+		7  : Modbus_ReadExceptionStatusResp,
+		8  : Modbus_DiagnosticResp,            # Note: Needs sub code (00-18, 20)
+		11 : Modbus_GetComEventCounterResp,
+		12 : Modbus_GetComEventLogResp,
+		17 : Modbus_ReportSlaveIdResp,
+		43 : Modbus_ReadDeviceIDResp, # Sub code 14
+
+	# "Other" function
+		43 : Modbus_EncapsulatedInterfaceTransportResp # sub codes 13,14
+}
 
 # Modbus is defined as using TCP port 502
 scapy_all.bind_layers(scapy_all.TCP, Modbus_MBAP, dport=502) # Request packet
