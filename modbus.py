@@ -8,13 +8,13 @@ from scapy import all as scapy_all
 
 modbus_classes_requests = {
 	# Data functions
-		2 : Modbus_ReadDiscreteInputsReq,
-		1 : Modbus_ReadCoilsReq,
-		5 : Modbus_WriteSingleCoilReq,
+		2  : Modbus_ReadDiscreteInputsReq,
+		1  : Modbus_ReadCoilsReq,
+		5  : Modbus_WriteSingleCoilReq,
 		15 : Modbus_WriteMultipleCoilsReq,
-		4 : Modbus_ReadInputRegisterReq,
-		3 : Modbus_ReadHoldingRegistersReq,
-		6 : Modbus_WriteSingleRegisterReq,
+		4  : Modbus_ReadInputRegisterReq,
+		3  : Modbus_ReadHoldingRegistersReq,
+		6  : Modbus_WriteSingleRegisterReq,
 		16 : Modbus_WriteMultipleRegistersReq,
 		23 : Modbus_ReadWriteMultipleRegistersReq,
 		22 : Modbus_MaskWriteRegistersReq,
@@ -23,8 +23,8 @@ modbus_classes_requests = {
 		21 : Modbus_ReadFileRecordReq,
 
 	# Diagnostic functions
-		7 : Modbus_ReadExceptionStatusReq,
-		8 : Modbus_DiagnosticReq,            # Note: Needs sub code (00-18, 20)
+		7  : Modbus_ReadExceptionStatusReq,
+		8  : Modbus_DiagnosticReq,            # Note: Needs sub code (00-18, 20)
 		11 : Modbus_GetComEventCounterReq,
 		12 : Modbus_GetComEventLogReq,
 		17 : Modbus_ReportSlaveIdReq,
@@ -36,13 +36,13 @@ modbus_classes_requests = {
 
 modbus_classes_responses = {
 	# Data functions
-		2 : Modbus_ReadDiscreteInputsResp,
-		1 : Modbus_ReadCoilsResp,
-		5 : Modbus_WriteSingleCoilResp,
+		2  : Modbus_ReadDiscreteInputsResp,
+		1  : Modbus_ReadCoilsResp,
+		5  : Modbus_WriteSingleCoilResp,
 		15 : Modbus_WriteMultipleCoilsResp,
-		4 : Modbus_ReadInputRegisterResp,
-		3 : Modbus_ReadHoldingRegistersResp,
-		6 : Modbus_WriteSingleRegisterResp,
+		4  : Modbus_ReadInputRegisterResp,
+		3  : Modbus_ReadHoldingRegistersResp,
+		6  : Modbus_WriteSingleRegisterResp,
 		16 : Modbus_WriteMultipleRegistersResp,
 		23 : Modbus_ReadWriteMultipleRegistersResp,
 		22 : Modbus_MaskWriteRegistersResp,
@@ -51,8 +51,8 @@ modbus_classes_responses = {
 		21 : Modbus_ReadFileRecordResp,
 
 	# Diagnostic functions
-		7 : Modbus_ReadExceptionStatusResp,
-		8 : Modbus_DiagnosticResp,            # Note: Needs sub code (00-18, 20)
+		7  : Modbus_ReadExceptionStatusResp,
+		8  : Modbus_DiagnosticResp,            # Note: Needs sub code (00-18, 20)
 		11 : Modbus_GetComEventCounterResp,
 		12 : Modbus_GetComEventLogResp,
 		17 : Modbus_ReportSlaveIdResp,
@@ -132,13 +132,13 @@ class Modbus_PDU(scapy_all.Packet):
 
 	FUNCTION_CODES = {
 	# Data functions
-		2 : "READ_DISCRETE_INPUTS",
-		1 : "READ_COILS",
-		5 : "WRITE_SINGLE_COIL",
+		2  : "READ_DISCRETE_INPUTS",
+		1  : "READ_COILS",
+		5  : "WRITE_SINGLE_COIL",
 		15 : "WRITE_MULTIPLE_COILS",
-		4 : "READ_INPUT_REGISTER",
-		3 : "READ_HOLDING_REGISTERS",
-		6 : "WRITE_SINGLE_REGISTER",
+		4  : "READ_INPUT_REGISTER",
+		3  : "READ_HOLDING_REGISTERS",
+		6  : "WRITE_SINGLE_REGISTER",
 		16 : "WRITE_MULTIPLE_REGISTERS",
 		23 : "READ_WRITE_MULTIPLE_REGISTERS",
 		22 : "MASK_WRITE_REGISTERS",
@@ -147,8 +147,8 @@ class Modbus_PDU(scapy_all.Packet):
 		21 : "READ_FILE_RECORD",
 
 	# Diagnostic functions
-		7 : "READ_EXCEPTION_STATUS",
-		8 : "DIAGNOSTIC",            # Note: Needs sub code (00-18, 20)
+		7  : "READ_EXCEPTION_STATUS",
+		8  : "DIAGNOSTIC",            # Note: Needs sub code (00-18, 20)
 		11 : "GET_COM_EVENT_COUNTER",
 		12 : "GET_COM_EVENT_LOG",
 		17 : "REPORT_SLAVE_ID",
@@ -215,27 +215,148 @@ class Modbus_ReadCoilsResp(scapy_all.Packet):
 		return p[:self.length], p[self.length:]
 
 
-#class Modbus_ReadDiscreteInputsReq(scapy_all.Packet):
+
+
+
+
+class Modbus_ReadDiscreteInputsReq(scapy_all.Packet):
 	"""Layer for read discrete inputs request"""
+	pass
 
-#class Modbus_ReadDiscreteInputsResp(scapy_all.Packet):
+class Modbus_ReadDiscreteInputsResp(scapy_all.Packet):
 	"""Layer for read discrete inputs response"""
+	pass
 
-#class Modbus_WriteSingleCoilReq(scapy_all.Packet):
+
+
+class Modbus_WriteSingleCoilReq(scapy_all.Packet):
 	"""Layer for write single coil request"""
+	pass
 
-#class Modbus_WriteSingleCoilResp(scapy_all.Packet):
+class Modbus_WriteSingleCoilResp(scapy_all.Packet):
 	"""Layer for write single coil response"""
+	pass
 
-#class Modbus_WriteMultipleCoilsReq(scapy_all.packet):
+
+
+class Modbus_WriteMultipleCoilsReq(scapy_all.packet):
 	"""Layer for write multiple coils request"""
+	pass
 
-#class Modbus_WriteMultipleCoilsResp(scapy_all.packet):
+class Modbus_WriteMultipleCoilsResp(scapy_all.packet):
 	"""Layer for wite multiple coils response"""
+	pass
 
-#class Modbus_ReportSlaveIdReq(scapy_all.Packet): # The request only has the function code: 0x11 so no need for this layer
+
+
+class Modbus_ReadInputRegisterReq(scapy_all.Packet):
+	pass
+
+class Modbus_ReadInputRegisterResp(scapy_all.Packet):
+	pass
+
+
+
+class Modbus_ReadHoldingRegistersReq(scapy_all.Packet):
+	pass
+
+class Modbus_ReadHoldingRegistersResp(scapy_all.Packet):
+	pass
+
+
+
+class Modbus_WriteSingleRegisterReq(scapy_all.Packet):
+	pass
+
+class Modbus_WriteSingleRegisterResp(scapy_all.Packet):
+	pass
+
+
+
+class Modbus_WriteMultipleRegistersReq(scapy_all.Packet):
+	pass
+
+class Modbus_WriteMultipleRegistersResp(scapy_all.Packet):
+	pass
+
+
+
+class Modbus_ReadWriteMultipleRegistersReq(scapy_all.Packet):
+	pass
+
+class Modbus_ReadWriteMultipleRegistersResp(scapy_all.Packet):
+	pass
+
+
+
+class Modbus_MaskWriteRegistersReq(scapy_all.Packet):
+	pass
+
+class Modbus_MaskWriteRegistersResp(scapy_all.Packet):
+	pass
+
+
+
+class Modbus_ReadFIFOQueueReq(scapy_all.Packet):
+	pass
+
+class Modbus_ReadFIFOQueueResp(scapy_all.Packet):
+	pass
+
+
+
+class Modbus_WriteFileRecordReq(scapy_all.Packet):
+	pass
+
+class Modbus_WriteFileRecordResp(scapy_all.Packet):
+	pass
+
+
+
+class Modbus_ReadFileRecordReq(scapy_all.Packet):
+	pass
+
+class Modbus_ReadFileRecordResp(scapy_all.Packet):
+	pass
+
+
+
+	# Diagnostic functions
+class Modbus_ReadExceptionStatusReq(scapy_all.Packet):
+	pass
+
+class Modbus_ReadExceptionStatusResp(scapy_all.Packet):
+	pass
+
+
+
+class Modbus_DiagnosticReq(scapy_all.Packet):
+	pass
+
+class Modbus_DiagnosticResp(scapy_all.Packet):
+	pass
+
+
+
+class Modbus_GetComEventCounterReq(scapy_all.Packet):
+	pass
+
+class Modbus_GetComEventCounterResp(scapy_all.Packet):
+	pass
+
+
+
+class Modbus_GetComEventLogReq(scapy_all.Packet):
+	pass
+
+class Modbus_GetComEventLogResp(scapy_all.Packet):
+	pass
+
+
+
+class Modbus_ReportSlaveIdReq(scapy_all.Packet): # The request only has the function code: 0x11 so no need for this layer
 	"""Layer for report slave id request"""
-
+	pass
 
 class Modbus_ReportSlaveIdResp(scapy_all.Packet):
 	"""Layer for report slave ID response"""
@@ -257,6 +378,20 @@ class Modbus_ReportSlaveIdResp(scapy_all.Packet):
 	def extract_padding(self, p):
 		return "", p
 
+class Modbus_ReadDeviceIDReq(scapy_all.Packet):
+	pass
+
+class Modbus_ReadDeviceIDResp(scapy_all.Packet):
+	pass
+
+
+
+# "Other" function
+class Modbus_EncapsulatedInterfaceTransportReq(scapy_all.Packet):
+	pass
+
+class Modbus_EncapsulatedInterfaceTransportResp(scapy_all.Packet):
+	class
 
 # Modbus is defined as using TCP port 502
 scapy_all.bind_layers(scapy_all.TCP, Modbus_MBAP, dport=502) # Request packet
