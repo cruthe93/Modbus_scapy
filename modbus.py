@@ -165,13 +165,12 @@ class Modbus_PDU(scapy_all.Packet):
 	def guess_payload_class(self, payload):
 		"""Used do find out what the payload is, here we will use the function code.
 		scapy should be able to find out which packets are requests v answers by the tcp stream"""
-		is_request = True if self[TCP].sport=502 else False
+
 		if self.function_code in FUNCTION_CODES: # Valid code
 			if is_request(self): # Now look at code to determine payload class
-				if self.function_code==1:
-					return
+				return modbus_classes_requests[self.function_code]
 			elif is_response(self):
-				pass
+				return modbus_classes_responses[self.function_code]
 		else: # if we can't figure it out, then let scapy attempt to handle it
 			return scapy_all.guess_payload_class(self, payload)
 
@@ -398,23 +397,7 @@ scapy_all.bind_layers(Modbus_MBAP, Modbus_PDU)
 
 # Shouldn't need 'bind_layers' functions for each function code as we are using the
 # 'guess_payload_class' function
-
-"""
-bind_layers(Modbus_PDU, Modbus_ReadDiscreteInputsReq, function_code=2)
-bind_layers(Modbus_PDU, Modbus_ReadDiscreteInputsResp, function_code=2)
-
-scapy_all.bind_layers(scapy_all.TCP, Modbus_ReadCoilsReq, dport=502)
-scapy_all.bind_layers(Modbus_PDU, Modbus_ReadCoilsReq, function_code=1)
-scapy_all.bind_layers(Modbus_PDU, Modbus_ReadCoilsResp, function_code=1)
-scapy_all.bind_layers(Modbus_ReadCoilsReq, Modbus_ReadCoilsResp)
-
-bind_layers(Modbus_PDU, Modbus_WriteSingleCoilReq, function_code=5)
-bind_layers(Modbus_PDU, Modbus_WriteSingleCoilResp, function_code=5)
-bind_layers(Modbus_PDU, Modbus_WriteMultipleCoilsReq, function_code=15)
-bind_layers(Modbus_PDU, Modbus_WriteMultipleCoilsResp, function_code=15)
-bind_layers(Modbus_PDU, Modbus_ReportSlaveIdReq, function_code=17)
-"""
-#scapy_all.bind_layers(Modbus_PDU, Modbus_ReportSlaveIdResp, function_code=0x11)
+# There are too many request and response types to bother with binding layers
 
 
 if __name__ == "__main__":
