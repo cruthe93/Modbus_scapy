@@ -4,20 +4,7 @@ from scapy import all as scapy_all
 # How do you know if the layer is a request or a response?
 # Where do you put exception codes in the layers?
 # NOTE: for modbus the TCP layer has the PSH, ACK flags set.
-
-def is_request(self):
-	"""Function to determine if the packet is a request or response
-	There is nothing explicit in the protocol to delineate each, so we must
-	infer it from other things.
-
-	returns True if 'this' packet is a request, false if a response"""
-
-	if self[TCP].sport == 502 and self[TCP].dport != 502:
-		return True
-	elif self[TCP].sport != 502 and self[TCP].dport == 502:
-		return False
-
-	#What do we do if both ports are 502?
+#
 
 
 class Modbus_MBAP(scapy_all.Packet):
@@ -26,15 +13,43 @@ class Modbus_MBAP(scapy_all.Packet):
 	fields_desc = [
 		scapy_all.ShortField("transaction_id", generate_unique_id(self)), # A simple implementation of this is to use the tcp sequence number, and increment by 1 for each packet
 		scapy_all.ShortField("protocol_id", 0), # I believe for Modbus TCP this is always 0
-		scapy_all.ShortField("length", None),   # Is the length inherited from the child layers? If so, it'll need to be calculated
+		scapy_all.ShortField("length", None),   # Is the length inherited from the child layers? If so, it'll need to be calculated. I'm sure there is a function for this!
 		scapy_all.ByteField("unit_id", None),
 	]
 
+	def is_request(self):
+		"""Function to determine if the packet is a request or response
+		There is nothing explicit in the protocol to delineate each, so we must
+		infer it from other things.
+
+		returns True if 'this' packet is a request, false if a response"""
+
+		if self[TCP].sport != 502 and self[TCP].dport == 502:
+			return True
+		elif self[TCP].sport == 502 and self[TCP].dport != 502:
+			return False
+		elif self[TCP].sport == self[TCP].dport == 502:
+			return guess_request_response(self) # Define another function to guess
+		else: # None of the ports are 502
+			return False # Default value
+
+		#What do we do if both ports are 502?
+		# Can return a default Value
+		# Could return exception?
+		# Could try and use some other method using sequence numbers
+		# Can we use TCP flags?
+
+	def guess_request_response(self):
+		# TODO: implement
+		return False
+
 	def generate_unique_id(self):
-		if self[TCP].seq < 65534: #will it be over the max len?
-			return self[TCP].seq += 1 # Not sure this does what I think, will need to test
+		# should check that this layer is associated with a tcp sequence number, as when it is instantiated it might not be
+		if TCP in self:
+			return self[TCP].seq # Just being lazy and using tcp sequence num for this
 		else:
-			return 1
+			return 1 # Boring default value
+
 
 	def extract_padding(self, p): # Will there be any padding? This is supposed to return the length
 		return p[:self.length], p[self.length:]
