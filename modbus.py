@@ -216,9 +216,6 @@ class Modbus_ReadCoilsResp(scapy_all.Packet):
 
 
 
-
-
-
 class Modbus_ReadDiscreteInputsReq(scapy_all.Packet):
 	"""Layer for read discrete inputs request"""
 	pass
@@ -391,7 +388,8 @@ class Modbus_EncapsulatedInterfaceTransportReq(scapy_all.Packet):
 	pass
 
 class Modbus_EncapsulatedInterfaceTransportResp(scapy_all.Packet):
-	class
+	pass
+
 
 # Modbus is defined as using TCP port 502
 scapy_all.bind_layers(scapy_all.TCP, Modbus_MBAP, dport=502) # Request packet
