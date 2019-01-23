@@ -1,21 +1,29 @@
 import struct
 from scapy import all as scapy_all
 
-# How do you know if the layer is a request or a response?
-# Where do you put exception codes in the layers?
-# NOTE: for modbus the TCP layer has the PSH, ACK flags set.
-#
+
 
 class Modbus_MBAP(scapy_all.Packet):
 	"""Modbus TCP base packet layer. This represents the Modbus application protocol header (MBAP)"""
 	name = "Modbus_MBAP"
+
 	fields_desc = [
-		scapy_all.ShortField("transaction_id", generate_unique_id(self)), # A simple implementation of this is to use the tcp sequence number, and increment by 1 for each packet
+		scapy_all.ShortField("transaction_id", 0), # A simple implementation of this is to use the tcp sequence number, and increment by 1 for each packet
 		scapy_all.ShortField("protocol_id", 0), # I believe for Modbus TCP this is always 0
 		scapy_all.ShortField("length", None),   # Is the length inherited from the child layers? If so, it'll need to be calculated. I'm sure there is a function for this!
 		scapy_all.ByteField("unit_id", None),
 	]
 
+
+	@classmethod
+	def generate_unique_id(self):
+		# should check that this layer is associated with a tcp sequence number, as when it is instantiated it might not be
+		if TCP in self:
+			return self[TCP].seq # Just being lazy and using tcp sequence num for this
+		else:
+			return 1 # Boring default value
+
+	@classmethod
 	def is_request(self):
 		"""Function to determine if the packet is a request or response
 		There is nothing explicit in the protocol to delineate each, so we must
@@ -38,21 +46,10 @@ class Modbus_MBAP(scapy_all.Packet):
 		# Could try and use some other method using sequence numbers
 		# Can we use TCP flags?
 
+	@classmethod
 	def is_response(self):
 		# Added for code readability
-		return not is_request(self)
-
-	def guess_request_response(self):
-		# TODO: implement
-		return False
-
-	def generate_unique_id(self):
-		# should check that this layer is associated with a tcp sequence number, as when it is instantiated it might not be
-		if TCP in self:
-			return self[TCP].seq # Just being lazy and using tcp sequence num for this
-		else:
-			return 1 # Boring default value
-
+		return (not is_request(self))
 
 	def extract_padding(self, p): # Will there be any padding? This is supposed to return the length
 		return p[:self.length], p[self.length:]
@@ -179,11 +176,11 @@ class Modbus_WriteSingleCoilResp(scapy_all.Packet):
 
 
 
-class Modbus_WriteMultipleCoilsReq(scapy_all.packet):
+class Modbus_WriteMultipleCoilsReq(scapy_all.Packet):
 	"""Layer for write multiple coils request"""
 	pass
 
-class Modbus_WriteMultipleCoilsResp(scapy_all.packet):
+class Modbus_WriteMultipleCoilsResp(scapy_all.Packet):
 	"""Layer for wite multiple coils response"""
 	pass
 
@@ -315,8 +312,8 @@ class Modbus_ReportSlaveIdResp(scapy_all.Packet):
 		return p + pay
 		"""
 
-	def extract_padding(self, p):
-		return "", p
+	#def extract_padding(self, p):
+	#    return "", p
 
 class Modbus_ReadDeviceIDReq(scapy_all.Packet):
 	pass
