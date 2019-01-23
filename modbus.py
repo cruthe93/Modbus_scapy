@@ -6,6 +6,61 @@ from scapy import all as scapy_all
 # NOTE: for modbus the TCP layer has the PSH, ACK flags set.
 #
 
+modbus_classes_requests = {
+	# Data functions
+		2 : Modbus_ReadDiscreteInputsReq,
+		1 : Modbus_ReadCoilsReq,
+		5 : Modbus_WriteSingleCoilReq,
+		15 : Modbus_WriteMultipleCoilsReq,
+		4 : Modbus_ReadInputRegisterReq,
+		3 : Modbus_ReadHoldingRegistersReq,
+		6 : Modbus_WriteSingleRegisterReq,
+		16 : Modbus_WriteMultipleRegistersReq,
+		23 : Modbus_ReadWriteMultipleRegistersReq,
+		22 : Modbus_MaskWriteRegistersReq,
+		24 : Modbus_ReadFIFOQueueReq,
+		20 : Modbus_WriteFileRecordReq,
+		21 : Modbus_ReadFileRecordReq,
+
+	# Diagnostic functions
+		7 : Modbus_ReadExceptionStatusReq,
+		8 : Modbus_DiagnosticReq,            # Note: Needs sub code (00-18, 20)
+		11 : Modbus_GetComEventCounterReq,
+		12 : Modbus_GetComEventLogReq,
+		17 : Modbus_ReportSlaveIdReq,
+		43 : Modbus_ReadDeviceIDReq, # Sub code 14
+
+	# "Other" function
+		43 : Modbus_EncapsulatedInterfaceTransportResp # sub codes 13,14
+}
+
+modbus_classes_responses = {
+	# Data functions
+		2 : Modbus_ReadDiscreteInputsResp,
+		1 : Modbus_ReadCoilsResp,
+		5 : Modbus_WriteSingleCoilResp,
+		15 : Modbus_WriteMultipleCoilsResp,
+		4 : Modbus_ReadInputRegisterResp,
+		3 : Modbus_ReadHoldingRegistersResp,
+		6 : Modbus_WriteSingleRegisterResp,
+		16 : Modbus_WriteMultipleRegistersResp,
+		23 : Modbus_ReadWriteMultipleRegistersResp,
+		22 : Modbus_MaskWriteRegistersResp,
+		24 : Modbus_ReadFIFOQueueResp,
+		20 : Modbus_WriteFileRecordResp,
+		21 : Modbus_ReadFileRecordResp,
+
+	# Diagnostic functions
+		7 : Modbus_ReadExceptionStatusResp,
+		8 : Modbus_DiagnosticResp,            # Note: Needs sub code (00-18, 20)
+		11 : Modbus_GetComEventCounterResp,
+		12 : Modbus_GetComEventLogResp,
+		17 : Modbus_ReportSlaveIdResp,
+		43 : Modbus_ReadDeviceIDResp, # Sub code 14
+
+	# "Other" function
+		43 : Modbus_EncapsulatedInterfaceTransportResp # sub codes 13,14
+}
 
 class Modbus_MBAP(scapy_all.Packet):
 	"""Modbus TCP base packet layer. This represents the Modbus application protocol header (MBAP)"""
@@ -38,6 +93,10 @@ class Modbus_MBAP(scapy_all.Packet):
 		# Could return exception?
 		# Could try and use some other method using sequence numbers
 		# Can we use TCP flags?
+
+	def is_response(self):
+		# Added for code readability
+		return not is_request(self)
 
 	def guess_request_response(self):
 		# TODO: implement
@@ -108,6 +167,13 @@ class Modbus_PDU(scapy_all.Packet):
 		scapy should be able to find out which packets are requests v answers by the tcp stream"""
 		is_request = True if self[TCP].sport=502 else False
 		if self.function_code in FUNCTION_CODES: # Valid code
+			if is_request(self): # Now look at code to determine payload class
+				if self.function_code==1:
+					return
+			elif is_response(self):
+				pass
+		else: # if we can't figure it out, then let scapy attempt to handle it
+			return scapy_all.guess_payload_class(self, payload)
 
 
 
