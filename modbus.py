@@ -1,6 +1,6 @@
 import struct
 
-import scapy
+from scapy.main import interact
 from scapy.packet import Packet, bind_layers
 from scapy.layers.inet import TCP
 from scapy.fields import ShortField, ByteField, ByteEnumField, XByteField, XShortField, FieldLenField, StrLenField
@@ -401,4 +401,4 @@ bind_layers(Modbus_MBAP, Modbus_PDU)
 
 
 if __name__ == "__main__":
-	scapy.all.interact(mydict=globals(), mybanner="SCAPY MODBUS ADDON V0.01")
+	interact(mydict=globals(), mybanner="SCAPY MODBUS ADDON V0.01")
