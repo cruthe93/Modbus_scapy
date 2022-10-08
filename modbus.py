@@ -64,8 +64,8 @@ class ModbusMBAP(Packet):
     def post_build(self, p, pay):
         # Post build is used to calculate the length of fields
         if self.length is None and pay:
-            len = len(pay)
-            p = p[:4] + struct.pack(">H", len) + p[6:]  # This is due to the structure of the frame
+            length = len(pay)
+            p = p[:4] + struct.pack(">H", length) + p[6:]  # This is due to the structure of the frame
         return p + pay
 
     def answers(self, other):
