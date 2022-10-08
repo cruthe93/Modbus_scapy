@@ -6,9 +6,9 @@ from scapy.layers.inet import TCP
 from scapy.fields import ShortField, ByteField, ByteEnumField, XByteField, XShortField, FieldLenField, StrLenField
 
 
-class Modbus_MBAP(Packet):
+class ModbusMBAP(Packet):
     """Modbus TCP base packet layer. This represents the Modbus application protocol header (MBAP)"""
-    name = "Modbus_MBAP"
+    name = "ModbusMBAP"
 
     fields_desc = [
         ShortField("transaction_id", 0),
@@ -20,27 +20,27 @@ class Modbus_MBAP(Packet):
     ]
 
     @classmethod
-    def generate_unique_id(self):
+    def generate_unique_id(cls):
         # should check that this layer is associated with a tcp sequence number, as when it is instantiated it might not be
-        if TCP in self:
-            return self[TCP].seq  # Just being lazy and using tcp sequence num for this
+        if TCP in cls:
+            return cls[TCP].seq  # Just being lazy and using tcp sequence num for this
         else:
             return 1  # Boring default value
 
     @classmethod
-    def is_request(self):
+    def is_request(cls):
         """Function to determine if the packet is a request or response
         There is nothing explicit in the protocol to delineate each, so we must
         infer it from other things.
 
         returns True if 'this' packet is a request, false if a response"""
 
-        if self[TCP].sport != 502 and self[TCP].dport == 502:
+        if cls[TCP].sport != 502 and cls[TCP].dport == 502:
             return True
-        elif self[TCP].sport == 502 and self[TCP].dport != 502:
+        elif cls[TCP].sport == 502 and cls[TCP].dport != 502:
             return False
-        elif self[TCP].sport == self[TCP].dport == 502:
-            return self.guess_request_response  # Define another function to guess
+        elif cls[TCP].sport == cls[TCP].dport == 502:
+            return cls.guess_request_response  # Define another function to guess
         else:  # None of the ports are 502
             return False  # Default value
 
@@ -59,22 +59,22 @@ class Modbus_MBAP(Packet):
         return p[:self.length], p[self.length:]
 
     def default_payload_class(self, payload):  # In case we want to overload a default payload class with our own
-        return Modbus_PDU  #
+        return ModbusPDU  #
 
     def post_build(self, p, pay):
         # Post build is used to calculate the length of fields
         if self.length is None and pay:
-            l = len(pay)
-            p = p[:4] + struct.pack(">H", l) + p[6:]  # This is due to the structure of the frame
+            len = len(pay)
+            p = p[:4] + struct.pack(">H", len) + p[6:]  # This is due to the structure of the frame
         return p + pay
 
     def answers(self, other):
         # This needs adjusting!
         # Can base this on whether the packet is a request or response
-        return isinstance(other, Modbus_MBAP)
+        return isinstance(other, ModbusMBAP)
 
 
-class Modbus_PDU(Packet):
+class ModbusPDU(Packet):
     FUNCTION_CODES = {
         # Data functions
         2: "READ_DISCRETE_INPUTS",
@@ -152,7 +152,7 @@ class ModbusReadCoilsResp(Packet):
     """Layer for Read coils response packet"""
     fields_desc = [
         FieldLenField("byte_count", 0, length_of="coil_status"),
-        StrLenField("coil_status", "", length_from=lambda x: x.length)
+        StrLenField("coil_status", b"", length_from=lambda x: x.length)
     ]
 
     def extract_padding(self, p):
@@ -304,7 +304,7 @@ class ModbusReportSlaveIdResp(Packet):
     """Layer for report slave ID response"""
     fields_desc = [
         FieldLenField("byte_count", 0, length_of="slave_id"),
-        StrLenField("slave_id", "", length_from=lambda x: x.length),
+        StrLenField("slave_id", b"", length_from=lambda x: x.length),
         XByteField("run_status", 0x00)
     ]
 
@@ -395,9 +395,9 @@ modbus_classes_responses = {
 }
 
 # Modbus is defined as using TCP port 502
-bind_layers(TCP, Modbus_MBAP, dport=502)  # Request packet
-bind_layers(TCP, Modbus_MBAP, sport=502)  # Response packet
-bind_layers(Modbus_MBAP, Modbus_PDU)
+bind_layers(TCP, ModbusMBAP, dport=502)  # Request packet
+bind_layers(TCP, ModbusMBAP, sport=502)  # Response packet
+bind_layers(ModbusMBAP, ModbusPDU)
 
 # Shouldn't need 'bind_layers' functions for each function code as we are using the
 # 'guess_payload_class' function
