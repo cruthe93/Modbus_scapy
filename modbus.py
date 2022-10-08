@@ -1,17 +1,20 @@
 import struct
-from scapy import all as scapy_all
+
+import scapy
+from scapy.packet import Packet, bind_layers
+from scapy.layers.inet import TCP
+from scapy.fields import ShortField, ByteField, ByteEnumField, XByteField, XShortField, FieldLenField, StrLenField
 
 
-
-class Modbus_MBAP(scapy_all.Packet):
+class Modbus_MBAP(Packet):
 	"""Modbus TCP base packet layer. This represents the Modbus application protocol header (MBAP)"""
 	name = "Modbus_MBAP"
 
 	fields_desc = [
-		scapy_all.ShortField("transaction_id", 0), # A simple implementation of this is to use the tcp sequence number, and increment by 1 for each packet
-		scapy_all.ShortField("protocol_id", 0), # I believe for Modbus TCP this is always 0
-		scapy_all.ShortField("length", None),   # Is the length inherited from the child layers? If so, it'll need to be calculated. I'm sure there is a function for this!
-		scapy_all.ByteField("unit_id", None),
+		ShortField("transaction_id", 0), # A simple implementation of this is to use the tcp sequence number, and increment by 1 for each packet
+		ShortField("protocol_id", 0), # I believe for Modbus TCP this is always 0
+		ShortField("length", None),   # Is the length inherited from the child layers? If so, it'll need to be calculated. I'm sure there is a function for this!
+		ByteField("unit_id", None),
 	]
 
 
@@ -36,7 +39,7 @@ class Modbus_MBAP(scapy_all.Packet):
 		elif self[TCP].sport == 502 and self[TCP].dport != 502:
 			return False
 		elif self[TCP].sport == self[TCP].dport == 502:
-			return guess_request_response(self) # Define another function to guess
+			return self.guess_request_response # Define another function to guess
 		else: # None of the ports are 502
 			return False # Default value
 
@@ -49,7 +52,7 @@ class Modbus_MBAP(scapy_all.Packet):
 	@classmethod
 	def is_response(self):
 		# Added for code readability
-		return (not is_request(self))
+		return (not self.is_request)
 
 	def extract_padding(self, p): # Will there be any padding? This is supposed to return the length
 		return p[:self.length], p[self.length:]
@@ -69,7 +72,7 @@ class Modbus_MBAP(scapy_all.Packet):
 		# Can base this on whether the packet is a request or response
 		return isinstance(other, Modbus_MBAP)
 
-class Modbus_PDU(scapy_all.Packet):
+class Modbus_PDU(Packet):
 
 	FUNCTION_CODES = {
 	# Data functions
@@ -100,24 +103,24 @@ class Modbus_PDU(scapy_all.Packet):
 	}
 
 	fields_desc =[
-		scapy_all.ByteEnumField("function_code", None, FUNCTION_CODES)
+		ByteEnumField("function_code", None, FUNCTION_CODES)
 	]
 
 	def guess_payload_class(self, payload):
 		"""Used do find out what the payload is, here we will use the function code.
 		scapy should be able to find out which packets are requests v answers by the tcp stream"""
 
-		if self.function_code in FUNCTION_CODES: # Valid code
-			if is_request(self): # Now look at code to determine payload class
+		if self.function_code in self.FUNCTION_CODES: # Valid code
+			if self.is_request: # Now look at code to determine payload class
 				return modbus_classes_requests[self.function_code]
-			elif is_response(self):
+			elif self.is_response:
 				return modbus_classes_responses[self.function_code]
 		else: # if we can't figure it out, then let scapy attempt to handle it
-			return scapy_all.guess_payload_class(self, payload)
+			return self.guess_payload_class(payload)
 
 
 
-class Modbus_ExceptionCode(scapy_all.Packet):
+class Modbus_ExceptionCode(Packet):
 
 	EXCEPTION_CODES = {
 		0x01 : "ILLEGAL_FUNCTION",
@@ -132,23 +135,23 @@ class Modbus_ExceptionCode(scapy_all.Packet):
 	}
 
 	fields_desc = [
-		scapy_all.XByteField("exception_code", None)
+		XByteField("exception_code", None)
 	]
 
 # Do I need separate layers for both requests and responses?
 
-class Modbus_ReadCoilsReq(scapy_all.Packet):
+class Modbus_ReadCoilsReq(Packet):
 	"""Layer for Read coils request packet"""
 	fields_desc =[
-		scapy_all.XShortField("starting_address", 0x0000),
-		scapy_all.XShortField("quantity_coils", 0x0000)
+		XShortField("starting_address", 0x0000),
+		XShortField("quantity_coils", 0x0000)
 	]
 
-class Modbus_ReadCoilsResp(scapy_all.Packet):
+class Modbus_ReadCoilsResp(Packet):
 	"""Layer for Read coils response packet"""
 	fields_desc = [
-		scapy_all.FieldLenField("byte_count", 0, length_of="coil_status"),
-		scapy_all.StrLenField("coil_status", "", length_from= lambda x:x.length)
+		FieldLenField("byte_count", 0, length_of="coil_status"),
+		StrLenField("coil_status", "", length_from= lambda x:x.length)
 	]
 
 	def extract_padding(self, p):
@@ -156,151 +159,151 @@ class Modbus_ReadCoilsResp(scapy_all.Packet):
 
 
 
-class Modbus_ReadDiscreteInputsReq(scapy_all.Packet):
+class Modbus_ReadDiscreteInputsReq(Packet):
 	"""Layer for read discrete inputs request"""
 	pass
 
-class Modbus_ReadDiscreteInputsResp(scapy_all.Packet):
+class Modbus_ReadDiscreteInputsResp(Packet):
 	"""Layer for read discrete inputs response"""
 	pass
 
 
 
-class Modbus_WriteSingleCoilReq(scapy_all.Packet):
+class Modbus_WriteSingleCoilReq(Packet):
 	"""Layer for write single coil request"""
 	pass
 
-class Modbus_WriteSingleCoilResp(scapy_all.Packet):
+class Modbus_WriteSingleCoilResp(Packet):
 	"""Layer for write single coil response"""
 	pass
 
 
 
-class Modbus_WriteMultipleCoilsReq(scapy_all.Packet):
+class Modbus_WriteMultipleCoilsReq(Packet):
 	"""Layer for write multiple coils request"""
 	pass
 
-class Modbus_WriteMultipleCoilsResp(scapy_all.Packet):
-	"""Layer for wite multiple coils response"""
+class Modbus_WriteMultipleCoilsResp(Packet):
+	"""Layer for write multiple coils response"""
 	pass
 
 
 
-class Modbus_ReadInputRegisterReq(scapy_all.Packet):
+class Modbus_ReadInputRegisterReq(Packet):
 	pass
 
-class Modbus_ReadInputRegisterResp(scapy_all.Packet):
-	pass
-
-
-
-class Modbus_ReadHoldingRegistersReq(scapy_all.Packet):
-	pass
-
-class Modbus_ReadHoldingRegistersResp(scapy_all.Packet):
+class Modbus_ReadInputRegisterResp(Packet):
 	pass
 
 
 
-class Modbus_WriteSingleRegisterReq(scapy_all.Packet):
+class Modbus_ReadHoldingRegistersReq(Packet):
 	pass
 
-class Modbus_WriteSingleRegisterResp(scapy_all.Packet):
-	pass
-
-
-
-class Modbus_WriteMultipleRegistersReq(scapy_all.Packet):
-	pass
-
-class Modbus_WriteMultipleRegistersResp(scapy_all.Packet):
+class Modbus_ReadHoldingRegistersResp(Packet):
 	pass
 
 
 
-class Modbus_ReadWriteMultipleRegistersReq(scapy_all.Packet):
+class Modbus_WriteSingleRegisterReq(Packet):
 	pass
 
-class Modbus_ReadWriteMultipleRegistersResp(scapy_all.Packet):
-	pass
-
-
-
-class Modbus_MaskWriteRegistersReq(scapy_all.Packet):
-	pass
-
-class Modbus_MaskWriteRegistersResp(scapy_all.Packet):
+class Modbus_WriteSingleRegisterResp(Packet):
 	pass
 
 
 
-class Modbus_ReadFIFOQueueReq(scapy_all.Packet):
+class Modbus_WriteMultipleRegistersReq(Packet):
 	pass
 
-class Modbus_ReadFIFOQueueResp(scapy_all.Packet):
-	pass
-
-
-
-class Modbus_WriteFileRecordReq(scapy_all.Packet):
-	pass
-
-class Modbus_WriteFileRecordResp(scapy_all.Packet):
+class Modbus_WriteMultipleRegistersResp(Packet):
 	pass
 
 
 
-class Modbus_ReadFileRecordReq(scapy_all.Packet):
+class Modbus_ReadWriteMultipleRegistersReq(Packet):
 	pass
 
-class Modbus_ReadFileRecordResp(scapy_all.Packet):
+class Modbus_ReadWriteMultipleRegistersResp(Packet):
+	pass
+
+
+
+class Modbus_MaskWriteRegistersReq(Packet):
+	pass
+
+class Modbus_MaskWriteRegistersResp(Packet):
+	pass
+
+
+
+class Modbus_ReadFIFOQueueReq(Packet):
+	pass
+
+class Modbus_ReadFIFOQueueResp(Packet):
+	pass
+
+
+
+class Modbus_WriteFileRecordReq(Packet):
+	pass
+
+class Modbus_WriteFileRecordResp(Packet):
+	pass
+
+
+
+class Modbus_ReadFileRecordReq(Packet):
+	pass
+
+class Modbus_ReadFileRecordResp(Packet):
 	pass
 
 
 
 	# Diagnostic functions
-class Modbus_ReadExceptionStatusReq(scapy_all.Packet):
+class Modbus_ReadExceptionStatusReq(Packet):
 	pass
 
-class Modbus_ReadExceptionStatusResp(scapy_all.Packet):
-	pass
-
-
-
-class Modbus_DiagnosticReq(scapy_all.Packet):
-	pass
-
-class Modbus_DiagnosticResp(scapy_all.Packet):
+class Modbus_ReadExceptionStatusResp(Packet):
 	pass
 
 
 
-class Modbus_GetComEventCounterReq(scapy_all.Packet):
+class Modbus_DiagnosticReq(Packet):
 	pass
 
-class Modbus_GetComEventCounterResp(scapy_all.Packet):
-	pass
-
-
-
-class Modbus_GetComEventLogReq(scapy_all.Packet):
-	pass
-
-class Modbus_GetComEventLogResp(scapy_all.Packet):
+class Modbus_DiagnosticResp(Packet):
 	pass
 
 
 
-class Modbus_ReportSlaveIdReq(scapy_all.Packet): # The request only has the function code: 0x11 so no need for this layer
+class Modbus_GetComEventCounterReq(Packet):
+	pass
+
+class Modbus_GetComEventCounterResp(Packet):
+	pass
+
+
+
+class Modbus_GetComEventLogReq(Packet):
+	pass
+
+class Modbus_GetComEventLogResp(Packet):
+	pass
+
+
+
+class Modbus_ReportSlaveIdReq(Packet): # The request only has the function code: 0x11 so no need for this layer
 	"""Layer for report slave id request"""
 	pass
 
-class Modbus_ReportSlaveIdResp(scapy_all.Packet):
+class Modbus_ReportSlaveIdResp(Packet):
 	"""Layer for report slave ID response"""
 	fields_desc = [
-		scapy_all.FieldLenField("byte_count", 0, length_of="slave_id"),
-		scapy_all.StrLenField("slave_id", "", length_from=lambda x:x.length),
-		scapy_all.XByteField("run_status", 0x00)
+		FieldLenField("byte_count", 0, length_of="slave_id"),
+		StrLenField("slave_id", "", length_from=lambda x:x.length),
+		XByteField("run_status", 0x00)
 	]
 
 	"""
@@ -315,19 +318,19 @@ class Modbus_ReportSlaveIdResp(scapy_all.Packet):
 	#def extract_padding(self, p):
 	#    return "", p
 
-class Modbus_ReadDeviceIDReq(scapy_all.Packet):
+class Modbus_ReadDeviceIDReq(Packet):
 	pass
 
-class Modbus_ReadDeviceIDResp(scapy_all.Packet):
+class Modbus_ReadDeviceIDResp(Packet):
 	pass
 
 
 
 # "Other" function
-class Modbus_EncapsulatedInterfaceTransportReq(scapy_all.Packet):
+class Modbus_EncapsulatedInterfaceTransportReq(Packet):
 	pass
 
-class Modbus_EncapsulatedInterfaceTransportResp(scapy_all.Packet):
+class Modbus_EncapsulatedInterfaceTransportResp(Packet):
 	pass
 
 
@@ -388,9 +391,9 @@ modbus_classes_responses = {
 }
 
 # Modbus is defined as using TCP port 502
-scapy_all.bind_layers(scapy_all.TCP, Modbus_MBAP, dport=502) # Request packet
-scapy_all.bind_layers(scapy_all.TCP, Modbus_MBAP, sport=502) # Response packet
-scapy_all.bind_layers(Modbus_MBAP, Modbus_PDU)
+bind_layers(TCP, Modbus_MBAP, dport=502) # Request packet
+bind_layers(TCP, Modbus_MBAP, sport=502) # Response packet
+bind_layers(Modbus_MBAP, Modbus_PDU)
 
 # Shouldn't need 'bind_layers' functions for each function code as we are using the
 # 'guess_payload_class' function
@@ -398,4 +401,4 @@ scapy_all.bind_layers(Modbus_MBAP, Modbus_PDU)
 
 
 if __name__ == "__main__":
-	scapy_all.interact(mydict=globals(), mybanner="SCAPY MODBUS ADDON V0.01")
+	scapy.all.interact(mydict=globals(), mybanner="SCAPY MODBUS ADDON V0.01")
