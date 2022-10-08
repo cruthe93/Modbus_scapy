@@ -51,14 +51,14 @@ class Modbus_MBAP(Packet):
     # Can we use TCP flags?
 
     @classmethod
-    def is_response(self):
+    def is_response(cls):
         # Added for code readability
-        return (not self.is_request)
+        return not cls.is_request
 
     def extract_padding(self, p):  # Will there be any padding? This is supposed to return the length
         return p[:self.length], p[self.length:]
 
-    def default_payload_class(self):  # In case we want to overload a default payload class with our own
+    def default_payload_class(self, payload):  # In case we want to overload a default payload class with our own
         return Modbus_PDU  #
 
     def post_build(self, p, pay):
@@ -120,7 +120,7 @@ class Modbus_PDU(Packet):
             return self.guess_payload_class(payload)
 
 
-class Modbus_ExceptionCode(Packet):
+class ModbusExceptionCode(Packet):
     EXCEPTION_CODES = {
         0x01: "ILLEGAL_FUNCTION",
         0x02: "ILLEGAL_DATA_ADDRESS",
@@ -140,7 +140,7 @@ class Modbus_ExceptionCode(Packet):
 
 # Do I need separate layers for both requests and responses?
 
-class Modbus_ReadCoilsReq(Packet):
+class ModbusReadCoilsReq(Packet):
     """Layer for Read coils request packet"""
     fields_desc = [
         XShortField("starting_address", 0x0000),
@@ -148,7 +148,7 @@ class Modbus_ReadCoilsReq(Packet):
     ]
 
 
-class Modbus_ReadCoilsResp(Packet):
+class ModbusReadCoilsResp(Packet):
     """Layer for Read coils response packet"""
     fields_desc = [
         FieldLenField("byte_count", 0, length_of="coil_status"),
@@ -159,148 +159,148 @@ class Modbus_ReadCoilsResp(Packet):
         return p[:self.length], p[self.length:]
 
 
-class Modbus_ReadDiscreteInputsReq(Packet):
+class ModbusReadDiscreteInputsReq(Packet):
     """Layer for read discrete inputs request"""
     pass
 
 
-class Modbus_ReadDiscreteInputsResp(Packet):
+class ModbusReadDiscreteInputsResp(Packet):
     """Layer for read discrete inputs response"""
     pass
 
 
-class Modbus_WriteSingleCoilReq(Packet):
+class ModbusWriteSingleCoilReq(Packet):
     """Layer for write single coil request"""
     pass
 
 
-class Modbus_WriteSingleCoilResp(Packet):
+class ModbusWriteSingleCoilResp(Packet):
     """Layer for write single coil response"""
     pass
 
 
-class Modbus_WriteMultipleCoilsReq(Packet):
+class ModbusWriteMultipleCoilsReq(Packet):
     """Layer for write multiple coils request"""
     pass
 
 
-class Modbus_WriteMultipleCoilsResp(Packet):
+class ModbusWriteMultipleCoilsResp(Packet):
     """Layer for write multiple coils response"""
     pass
 
 
-class Modbus_ReadInputRegisterReq(Packet):
+class ModbusReadInputRegisterReq(Packet):
     pass
 
 
-class Modbus_ReadInputRegisterResp(Packet):
+class ModbusReadInputRegisterResp(Packet):
     pass
 
 
-class Modbus_ReadHoldingRegistersReq(Packet):
+class ModbusReadHoldingRegistersReq(Packet):
     pass
 
 
-class Modbus_ReadHoldingRegistersResp(Packet):
+class ModbusReadHoldingRegistersResp(Packet):
     pass
 
 
-class Modbus_WriteSingleRegisterReq(Packet):
+class ModbusWriteSingleRegisterReq(Packet):
     pass
 
 
-class Modbus_WriteSingleRegisterResp(Packet):
+class ModbusWriteSingleRegisterResp(Packet):
     pass
 
 
-class Modbus_WriteMultipleRegistersReq(Packet):
+class ModbusWriteMultipleRegistersReq(Packet):
     pass
 
 
-class Modbus_WriteMultipleRegistersResp(Packet):
+class ModbusWriteMultipleRegistersResp(Packet):
     pass
 
 
-class Modbus_ReadWriteMultipleRegistersReq(Packet):
+class ModbusReadWriteMultipleRegistersReq(Packet):
     pass
 
 
-class Modbus_ReadWriteMultipleRegistersResp(Packet):
+class ModbusReadWriteMultipleRegistersResp(Packet):
     pass
 
 
-class Modbus_MaskWriteRegistersReq(Packet):
+class ModbusMaskWriteRegistersReq(Packet):
     pass
 
 
-class Modbus_MaskWriteRegistersResp(Packet):
+class ModbusMaskWriteRegistersResp(Packet):
     pass
 
 
-class Modbus_ReadFIFOQueueReq(Packet):
+class ModbusReadFIFOQueueReq(Packet):
     pass
 
 
-class Modbus_ReadFIFOQueueResp(Packet):
+class ModbusReadFIFOQueueResp(Packet):
     pass
 
 
-class Modbus_WriteFileRecordReq(Packet):
+class ModbusWriteFileRecordReq(Packet):
     pass
 
 
-class Modbus_WriteFileRecordResp(Packet):
+class ModbusWriteFileRecordResp(Packet):
     pass
 
 
-class Modbus_ReadFileRecordReq(Packet):
+class ModbusReadFileRecordReq(Packet):
     pass
 
 
-class Modbus_ReadFileRecordResp(Packet):
+class ModbusReadFileRecordResp(Packet):
     pass
 
 # Diagnostic functions
 
 
-class Modbus_ReadExceptionStatusReq(Packet):
+class ModbusReadExceptionStatusReq(Packet):
     pass
 
 
-class Modbus_ReadExceptionStatusResp(Packet):
+class ModbusReadExceptionStatusResp(Packet):
     pass
 
 
-class Modbus_DiagnosticReq(Packet):
+class ModbusDiagnosticReq(Packet):
     pass
 
 
-class Modbus_DiagnosticResp(Packet):
+class ModbusDiagnosticResp(Packet):
     pass
 
 
-class Modbus_GetComEventCounterReq(Packet):
+class ModbusGetComEventCounterReq(Packet):
     pass
 
 
-class Modbus_GetComEventCounterResp(Packet):
+class ModbusGetComEventCounterResp(Packet):
     pass
 
 
-class Modbus_GetComEventLogReq(Packet):
+class ModbusGetComEventLogReq(Packet):
     pass
 
 
-class Modbus_GetComEventLogResp(Packet):
+class ModbusGetComEventLogResp(Packet):
     pass
 
 
-class Modbus_ReportSlaveIdReq(Packet):  # The request only has the function code: 0x11 so no need for this layer
+class ModbusReportSlaveIdReq(Packet):  # The request only has the function code: 0x11 so no need for this layer
     """Layer for report slave id request"""
     pass
 
 
-class Modbus_ReportSlaveIdResp(Packet):
+class ModbusReportSlaveIdResp(Packet):
     """Layer for report slave ID response"""
     fields_desc = [
         FieldLenField("byte_count", 0, length_of="slave_id"),
@@ -321,77 +321,77 @@ class Modbus_ReportSlaveIdResp(Packet):
 # def extract_padding(self, p):
 #    return "", p
 
-class Modbus_ReadDeviceIDReq(Packet):
+class ModbusReadDeviceIDReq(Packet):
     pass
 
 
-class Modbus_ReadDeviceIDResp(Packet):
+class ModbusReadDeviceIDResp(Packet):
     pass
 
 
 # "Other" function
-class Modbus_EncapsulatedInterfaceTransportReq(Packet):
+class ModbusEncapsulatedInterfaceTransportReq(Packet):
     pass
 
 
-class Modbus_EncapsulatedInterfaceTransportResp(Packet):
+class ModbusEncapsulatedInterfaceTransportResp(Packet):
     pass
 
 
 modbus_classes_requests = {
     # Data functions
-    2: Modbus_ReadDiscreteInputsReq,
-    1: Modbus_ReadCoilsReq,
-    5: Modbus_WriteSingleCoilReq,
-    15: Modbus_WriteMultipleCoilsReq,
-    4: Modbus_ReadInputRegisterReq,
-    3: Modbus_ReadHoldingRegistersReq,
-    6: Modbus_WriteSingleRegisterReq,
-    16: Modbus_WriteMultipleRegistersReq,
-    23: Modbus_ReadWriteMultipleRegistersReq,
-    22: Modbus_MaskWriteRegistersReq,
-    24: Modbus_ReadFIFOQueueReq,
-    20: Modbus_WriteFileRecordReq,
-    21: Modbus_ReadFileRecordReq,
+    2: ModbusReadDiscreteInputsReq,
+    1: ModbusReadCoilsReq,
+    5: ModbusWriteSingleCoilReq,
+    15: ModbusWriteMultipleCoilsReq,
+    4: ModbusReadInputRegisterReq,
+    3: ModbusReadHoldingRegistersReq,
+    6: ModbusWriteSingleRegisterReq,
+    16: ModbusWriteMultipleRegistersReq,
+    23: ModbusReadWriteMultipleRegistersReq,
+    22: ModbusMaskWriteRegistersReq,
+    24: ModbusReadFIFOQueueReq,
+    20: ModbusWriteFileRecordReq,
+    21: ModbusReadFileRecordReq,
 
     # Diagnostic functions
-    7: Modbus_ReadExceptionStatusReq,
-    8: Modbus_DiagnosticReq,  # Note: Needs sub code (00-18, 20)
-    11: Modbus_GetComEventCounterReq,
-    12: Modbus_GetComEventLogReq,
-    17: Modbus_ReportSlaveIdReq,
-    43: Modbus_ReadDeviceIDReq,  # Sub code 14
+    7: ModbusReadExceptionStatusReq,
+    8: ModbusDiagnosticReq,  # Note: Needs sub code (00-18, 20)
+    11: ModbusGetComEventCounterReq,
+    12: ModbusGetComEventLogReq,
+    17: ModbusReportSlaveIdReq,
+    43: ModbusReadDeviceIDReq,  # Sub code 14
 
     # "Other" function
-    43: Modbus_EncapsulatedInterfaceTransportResp  # sub codes 13,14
+    43: ModbusEncapsulatedInterfaceTransportResp  # sub codes 13,14
 }
 
 modbus_classes_responses = {
     # Data functions
-    2: Modbus_ReadDiscreteInputsResp,
-    1: Modbus_ReadCoilsResp,
-    5: Modbus_WriteSingleCoilResp,
-    15: Modbus_WriteMultipleCoilsResp,
-    4: Modbus_ReadInputRegisterResp,
-    3: Modbus_ReadHoldingRegistersResp,
-    6: Modbus_WriteSingleRegisterResp,
-    16: Modbus_WriteMultipleRegistersResp,
-    23: Modbus_ReadWriteMultipleRegistersResp,
-    22: Modbus_MaskWriteRegistersResp,
-    24: Modbus_ReadFIFOQueueResp,
-    20: Modbus_WriteFileRecordResp,
-    21: Modbus_ReadFileRecordResp,
+    2: ModbusReadDiscreteInputsResp,
+    1: ModbusReadCoilsResp,
+    5: ModbusWriteSingleCoilResp,
+    15: ModbusWriteMultipleCoilsResp,
+    4: ModbusReadInputRegisterResp,
+    3: ModbusReadHoldingRegistersResp,
+    6: ModbusWriteSingleRegisterResp,
+    16: ModbusWriteMultipleRegistersResp,
+    23: ModbusReadWriteMultipleRegistersResp,
+    22: ModbusMaskWriteRegistersResp,
+    24: ModbusReadFIFOQueueResp,
+    20: ModbusWriteFileRecordResp,
+    21: ModbusReadFileRecordResp,
 
     # Diagnostic functions
-    7: Modbus_ReadExceptionStatusResp,
-    8: Modbus_DiagnosticResp,  # Note: Needs sub code (00-18, 20)
-    11: Modbus_GetComEventCounterResp,
-    12: Modbus_GetComEventLogResp,
-    17: Modbus_ReportSlaveIdResp,
-    43: Modbus_ReadDeviceIDResp,  # Sub code 14
+    7: ModbusReadExceptionStatusResp,
+    8: ModbusDiagnosticResp,  # Note: Needs sub code (00-18, 20)
+    11: ModbusGetComEventCounterResp,
+    12: ModbusGetComEventLogResp,
+    17: ModbusReportSlaveIdResp,
+    43: ModbusReadDeviceIDResp,  # Sub code 14
 
     # "Other" function
-    43: Modbus_EncapsulatedInterfaceTransportResp  # sub codes 13,14
+    43: ModbusEncapsulatedInterfaceTransportResp  # sub codes 13,14
 }
 
 # Modbus is defined as using TCP port 502
